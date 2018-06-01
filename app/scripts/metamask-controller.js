@@ -26,7 +26,7 @@ const CurrencyController = require('./controllers/currency')
 const NoticeController = require('./notice-controller')
 const ShapeShiftController = require('./controllers/shapeshift')
 const AddressBookController = require('./controllers/address-book')
-const InfuraController = require('./controllers/infura')
+const NetworkStatusController = require('@metamask/gaba/NetworkStatusController').default
 const BlacklistController = require('./controllers/blacklist')
 const RecentBlocksController = require('./controllers/recent-blocks')
 const MessageManager = require('./lib/message-manager')
@@ -95,10 +95,7 @@ module.exports = class MetamaskController extends EventEmitter {
     this.currencyController.scheduleConversionInterval()
 
     // infura controller
-    this.infuraController = new InfuraController({
-      initState: initState.InfuraController,
-    })
-    this.infuraController.scheduleInfuraNetworkCheck()
+    this.networkStatusController = new NetworkStatusController()
 
     this.blacklistController = new BlacklistController()
     this.blacklistController.scheduleUpdates()
@@ -202,7 +199,7 @@ module.exports = class MetamaskController extends EventEmitter {
       NoticeController: this.noticeController.store,
       ShapeShiftController: this.shapeshiftController.store,
       NetworkController: this.networkController.store,
-      InfuraController: this.infuraController.store,
+      InfuraController: this.networkStatusController,
     })
 
     this.memStore = new ComposableObservableStore(null, {
@@ -221,7 +218,7 @@ module.exports = class MetamaskController extends EventEmitter {
       CurrencyController: this.currencyController.store,
       NoticeController: this.noticeController.memStore,
       ShapeshiftController: this.shapeshiftController.store,
-      InfuraController: this.infuraController.store,
+      InfuraController: this.networkStatusController,
     })
     this.memStore.subscribe(this.sendUpdate.bind(this))
   }
