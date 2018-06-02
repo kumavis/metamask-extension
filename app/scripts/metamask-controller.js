@@ -22,11 +22,11 @@ const setupMultiplex = require('./lib/stream-utils.js').setupMultiplex
 const KeyringController = require('eth-keyring-controller')
 const NetworkController = require('./controllers/network')
 const PreferencesController = require('./controllers/preferences')
-const CurrencyController = require('./controllers/currency')
 const NoticeController = require('./notice-controller')
 const ShapeShiftController = require('./controllers/shapeshift')
 const AddressBookController = require('@metamask/gaba/AddressBookController').default
 const NetworkStatusController = require('@metamask/gaba/NetworkStatusController').default
+const CurrencyRateController = require('@metamask/gaba/CurrencyRateController').default
 const BlacklistController = require('./controllers/blacklist')
 const RecentBlocksController = require('./controllers/recent-blocks')
 const MessageManager = require('./lib/message-manager')
@@ -88,11 +88,7 @@ module.exports = class MetamaskController extends EventEmitter {
     })
 
     // currency controller
-    this.currencyController = new CurrencyController({
-      initState: initState.CurrencyController,
-    })
-    this.currencyController.updateConversionRate()
-    this.currencyController.scheduleConversionInterval()
+    this.currencyRateController = new CurrencyRateController(initState.CurrencyRateController)
 
     // network status controller
     this.networkStatusController = new NetworkStatusController(initState.NetworkStatusController)
@@ -192,7 +188,7 @@ module.exports = class MetamaskController extends EventEmitter {
       KeyringController: this.keyringController.store,
       PreferencesController: this.preferencesController.store,
       AddressBookController: this.addressBookController,
-      CurrencyController: this.currencyController.store,
+      CurrencyRateController: this.currencyRateController,
       NoticeController: this.noticeController.store,
       ShapeShiftController: this.shapeshiftController.store,
       NetworkController: this.networkController.store,
@@ -212,7 +208,7 @@ module.exports = class MetamaskController extends EventEmitter {
       PreferencesController: this.preferencesController.store,
       RecentBlocksController: this.recentBlocksController.store,
       AddressBookController: this.addressBookController,
-      CurrencyController: this.currencyController.store,
+      CurrencyRateController: this.currencyRateController,
       NoticeController: this.noticeController.memStore,
       ShapeshiftController: this.shapeshiftController.store,
       NetworkStatusController: this.networkStatusController,
@@ -1130,12 +1126,11 @@ module.exports = class MetamaskController extends EventEmitter {
    */
   setCurrentCurrency (currencyCode, cb) {
     try {
-      this.currencyController.setCurrentCurrency(currencyCode)
-      this.currencyController.updateConversionRate()
+      this.currencyRateController.currency = currencyCode
       const data = {
-        conversionRate: this.currencyController.getConversionRate(),
-        currentCurrency: this.currencyController.getCurrentCurrency(),
-        conversionDate: this.currencyController.getConversionDate(),
+        conversionRate: this.currencyRateController.state.conversionRate,
+        currentCurrency: currencyCode,
+        conversionDate: this.currencyRateController.state.conversionDate,
       }
       cb(null, data)
     } catch (err) {
