@@ -24,9 +24,6 @@ const NetworkController = require('./controllers/network')
 const PreferencesController = require('./controllers/preferences')
 const NoticeController = require('./notice-controller')
 const ShapeShiftController = require('./controllers/shapeshift')
-const AddressBookController = require('@metamask/gaba/AddressBookController').default
-const NetworkStatusController = require('@metamask/gaba/NetworkStatusController').default
-const CurrencyRateController = require('@metamask/gaba/CurrencyRateController').default
 const BlacklistController = require('./controllers/blacklist')
 const RecentBlocksController = require('./controllers/recent-blocks')
 const MessageManager = require('./lib/message-manager')
@@ -34,7 +31,6 @@ const PersonalMessageManager = require('./lib/personal-message-manager')
 const TypedMessageManager = require('./lib/typed-message-manager')
 const TransactionController = require('./controllers/transactions')
 const BalancesController = require('./controllers/computed-balances')
-const TokenRatesController = require('./controllers/token-rates')
 const ConfigManager = require('./lib/config-manager')
 const nodeify = require('./lib/nodeify')
 const accountImporter = require('./account-import-strategies')
@@ -47,6 +43,11 @@ const percentile = require('percentile')
 const seedPhraseVerifier = require('./lib/seed-phrase-verifier')
 const cleanErrorStack = require('./lib/cleanErrorStack')
 const log = require('loglevel')
+
+const AddressBookController = require('@metamask/gaba/AddressBookController').default
+const CurrencyRateController = require('@metamask/gaba/CurrencyRateController').default
+const NetworkStatusController = require('@metamask/gaba/NetworkStatusController').default
+const TokenRatesController = require('@metamask/gaba/TokenRatesController').default
 
 module.exports = class MetamaskController extends EventEmitter {
 
@@ -101,9 +102,8 @@ module.exports = class MetamaskController extends EventEmitter {
     this.blockTracker = this.provider._blockTracker
 
     // token exchange rate tracker
-    this.tokenRatesController = new TokenRatesController({
-      preferences: this.preferencesController.store,
-    })
+    this.tokenRatesController = new TokenRatesController()
+    this.preferencesController.store.subscribe(({ tokens = [] }) => { this.tokenRatesController.tokens = tokens })
 
     this.recentBlocksController = new RecentBlocksController({
       blockTracker: this.blockTracker,
@@ -200,7 +200,7 @@ module.exports = class MetamaskController extends EventEmitter {
       AccountTracker: this.accountTracker.store,
       TxController: this.txController.memStore,
       BalancesController: this.balancesController.store,
-      TokenRatesController: this.tokenRatesController.store,
+      TokenRatesController: this.tokenRatesController,
       MessageManager: this.messageManager.memStore,
       PersonalMessageManager: this.personalMessageManager.memStore,
       TypesMessageManager: this.typedMessageManager.memStore,
@@ -1232,6 +1232,6 @@ module.exports = class MetamaskController extends EventEmitter {
    * @param {boolean} active - True if price data should be getting fetched.
    */
   set isClientOpenAndUnlocked (active) {
-    this.tokenRatesController.isActive = active
+    this.tokenRatesController.disabled = !active
   }
 }
