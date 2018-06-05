@@ -43,11 +43,11 @@ const seedPhraseVerifier = require('./lib/seed-phrase-verifier')
 const cleanErrorStack = require('./lib/cleanErrorStack')
 const log = require('loglevel')
 
-const AddressBookController = require('@metamask/gaba/AddressBookController').default
-const CurrencyRateController = require('@metamask/gaba/CurrencyRateController').default
-const NetworkStatusController = require('@metamask/gaba/NetworkStatusController').default
-const PhishingController = require('@metamask/gaba/PhishingController').default
-const TokenRatesController = require('@metamask/gaba/TokenRatesController').default
+const AddressBookController = require('gaba/AddressBookController').default
+const CurrencyRateController = require('gaba/CurrencyRateController').default
+const NetworkStatusController = require('gaba/NetworkStatusController').default
+const PhishingController = require('gaba/PhishingController').default
+const TokenRatesController = require('gaba/TokenRatesController').default
 
 module.exports = class MetamaskController extends EventEmitter {
 
