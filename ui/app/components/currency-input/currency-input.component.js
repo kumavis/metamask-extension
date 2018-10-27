@@ -95,6 +95,7 @@ export default class CurrencyInput extends PureComponent {
     return (
       <CurrencyDisplay
         className="currency-input__conversion-component"
+        nativeCurrency={nativeCurrency}
         currency={currency}
         value={hexValue}
         numberOfDecimals={numberOfDecimals}

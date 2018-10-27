@@ -1,22 +1,23 @@
 import { connect } from 'react-redux'
 import CurrencyDisplay from './currency-display.component'
 import { getValueFromWeiHex, formatCurrency } from '../../helpers/confirm-transaction/util'
+import { ETH } from '../../constants/common'
 
 const mapStateToProps = state => {
-  const { metamask: { nativeCurrency, currentCurrency, conversionRate } } = state
+  const { metamask: { currentCurrency, conversionRate } } = state
 
   return {
     currentCurrency,
     conversionRate,
-    nativeCurrency,
   }
 }
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
-  const { nativeCurrency, currentCurrency, conversionRate, ...restStateProps } = stateProps
+  const { currentCurrency, conversionRate, ...restStateProps } = stateProps
   const {
     value,
     numberOfDecimals = 2,
+    nativeCurrency = ETH,
     currency,
     denomination,
     hideLabel,
